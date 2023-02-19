@@ -132,6 +132,7 @@ public class GameAnalyzer {
         System.out.println("==================================TOURNAMENT RATING TABLE==================================");
         System.out.println("        Name        |      Nickname      |   Number   |     Team name     |  Rating points  ");
         System.out.println("===========================================================================================");
+
         for(Map.Entry<Player, Integer> playersRating : playerRatingTable.entrySet()) {
             System.out.printf(" %-20s| %-20s| %-12d| %-19s| %-17d %n",playersRating.getKey().getName(),playersRating.getKey().getNickname(),
                     playersRating.getKey().getNumber(),playersRating.getKey().getTeamName(),playersRating.getValue());

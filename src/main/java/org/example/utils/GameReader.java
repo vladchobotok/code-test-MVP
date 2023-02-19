@@ -9,10 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 public class GameReader {
 
-    public List<List<String>> readAllGames(){
+    public List<List<String>> readAllGames(String pathname){
 
         //reading all csv files and converting them into list of files (lists of strings)
-        File[] files = new File(System.getProperty("user.dir") + "/src/main/resources").listFiles(x -> x.isFile() && x.getName().endsWith(".csv"));
+        File[] files = new File(pathname).listFiles(x -> x.isFile() && x.getName().endsWith(".csv"));
         List<List<String>> records = new ArrayList<>();
 
         if (files != null) {

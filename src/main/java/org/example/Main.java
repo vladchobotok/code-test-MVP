@@ -19,7 +19,7 @@ public class Main
         GameReader gameReader = context.getBean("gameReaderBean", GameReader.class);
         GameAnalyzer gameAnalyzer = context.getBean("gameAnalyzerBean", GameAnalyzer.class);
 
-        List<List<String>> allGamesData = gameReader.readAllGames();
+        List<List<String>> allGamesData = gameReader.readAllGames(System.getProperty("user.dir") + "/src/main/resources");
         List<List<Player>> allPlayers = gameAnalyzer.getPlayersFromAllMatches(allGamesData);
 
         gameAnalyzer.getResultOfMatches(allPlayers);
