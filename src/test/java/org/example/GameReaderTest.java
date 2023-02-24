@@ -1,43 +1,51 @@
 package org.example;
 
-import org.example.config.MvpConfig;
+import com.github.stefanbirkner.systemlambda.SystemLambda;
 import org.example.players.BasketballPlayer;
 import org.example.players.Player;
+import org.example.config.AppConfig;
 import org.example.utils.GameReader;
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = AppConfig.class)
 public class GameReaderTest {
-    ApplicationContext context = new AnnotationConfigApplicationContext(MvpConfig.class);
-    GameReader gameReader = context.getBean("gameReaderBean", GameReader.class);
+    @Autowired
+    private GameReader gameReader;
+    private List<List<Player>> expectedPlayers;
+
+    @Before
+    public void setUpVariables() {
+        expectedPlayers = new ArrayList<>();
+        List<Player> playerList = new ArrayList<>();
+        playerList.add(new BasketballPlayer("player 1", "nick1", 4, "Team A", 10, 2, 7));
+        playerList.add(new BasketballPlayer("player 2", "nick2", 8, "Team A", 0, 10, 0));
+        playerList.add(new BasketballPlayer("player 3", "nick3", 15, "Team A", 15, 10, 4));
+        playerList.add(new BasketballPlayer("player 4", "nick4", 16, "Team B", 20, 0, 0));
+        playerList.add(new BasketballPlayer("player 5", "nick5", 23, "Team B", 4, 7, 7));
+        playerList.add(new BasketballPlayer("player 6", "nick6", 42, "Team B", 8, 10, 0));
+        expectedPlayers.add(playerList);
+    }
 
     @Test
-    public void readAllGamesTest() {
-        List<String> data = new ArrayList<>();
-        List<List<String>> matches = new ArrayList<>();
-        data.add("BASKETBALL"); matches.add(data); data = new ArrayList<>();
-        data.add("player 1");data.add("nick1");data.add("4");data.add("Team A");data.add("10");data.add("2");data.add("7"); matches.add(data); data = new ArrayList<>();
-        data.add("player 2");data.add("nick2");data.add("8");data.add("Team A");data.add("0");data.add("10");data.add("0"); matches.add(data); data = new ArrayList<>();
-        data.add("player 3");data.add("nick3");data.add("15");data.add("Team A");data.add("15");data.add("10");data.add("4"); matches.add(data); data = new ArrayList<>();
-        data.add("player 4");data.add("nick4");data.add("16");data.add("Team B");data.add("20");data.add("0");data.add("0"); matches.add(data); data = new ArrayList<>();
-        data.add("player 5");data.add("nick5");data.add("23");data.add("Team B");data.add("4");data.add("7");data.add("7"); matches.add(data); data = new ArrayList<>();
-        data.add("player 6");data.add("nick6");data.add("42");data.add("Team B");data.add("8");data.add("10");data.add("0"); matches.add(data); data = new ArrayList<>();
-        data.add("HANDBALL"); matches.add(data); data = new ArrayList<>();
-        data.add("player 1");data.add("nick1");data.add("4");data.add("Team A");data.add("0");data.add("20"); matches.add(data);  data = new ArrayList<>();
-        data.add("player 2");data.add("nick2");data.add("8");data.add("Team A");data.add("15");data.add("20"); matches.add(data);  data = new ArrayList<>();
-        data.add("player 3");data.add("nick3");data.add("15");data.add("Team A");data.add("10");data.add("20"); matches.add(data);  data = new ArrayList<>();
-        data.add("player 4");data.add("nick4");data.add("16");data.add("Team B");data.add("0");data.add("25"); matches.add(data); data = new ArrayList<>();
-        data.add("player 5");data.add("nick5");data.add("23");data.add("Team B");data.add("12");data.add("25"); matches.add(data);  data = new ArrayList<>();
-        data.add("player 6");data.add("nick6");data.add("42");data.add("Team B");data.add("8");data.add("25"); matches.add(data);
+    public void getPlayersFromAllMatchesWithRepeatingNicknameTest() throws Exception {
+        int actualStatus = SystemLambda.catchSystemExit(() -> gameReader.getPlayersFromAllMatches(System.getProperty("user.dir") + "/src/main/resources/test2"));
+        assertEquals(0, actualStatus);
+    }
 
-        List<List<String>> allData = gameReader.readAllGames(System.getProperty("user.dir") + "/src/main/resources/test");
-
-        assertEquals(matches, allData);
+    @Test
+    public void getPlayersFromAllMatchesTest() {
+        List<List<Player>> actualPlayers = gameReader.getPlayersFromAllMatches(System.getProperty("user.dir") + "/src/main/resources/test3");
+        assertEquals(expectedPlayers, actualPlayers);
     }
 }
