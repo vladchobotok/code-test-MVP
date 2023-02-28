@@ -3,25 +3,28 @@ package org.example;
 import com.github.stefanbirkner.systemlambda.SystemLambda;
 import org.example.players.BasketballPlayer;
 import org.example.players.Player;
-import org.example.config.AppConfig;
 import org.example.utils.GameReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class GameReaderTest {
+    private final GameReader gameReader;
+
     @Autowired
-    private GameReader gameReader;
+    GameReaderTest(GameReader gameReader){
+        this.gameReader = gameReader;
+    }
     private List<List<Player>> expectedPlayers;
 
     @Before
@@ -39,7 +42,9 @@ public class GameReaderTest {
 
     @Test
     public void getPlayersFromAllMatchesWithRepeatingNicknameTest() throws Exception {
-        int actualStatus = SystemLambda.catchSystemExit(() -> gameReader.getPlayersFromAllMatches(System.getProperty("user.dir") + "/src/main/resources/test2"));
+        int actualStatus = SystemLambda.catchSystemExit(() -> {
+            gameReader.getPlayersFromAllMatches(System.getProperty("user.dir") + "/src/main/resources/test2");
+        });
         assertEquals(0, actualStatus);
     }
 

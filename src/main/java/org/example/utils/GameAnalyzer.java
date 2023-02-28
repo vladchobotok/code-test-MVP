@@ -12,59 +12,57 @@ public class GameAnalyzer {
 
     //iterating through the games and calculating players' rating points
     public Map.Entry<Player, Integer> getMvpOfTournament(List<List<Player>> allPlayers){
-        for (List<Player> playerList: allPlayers) {
+
+        allPlayers.forEach(playerList -> {
             Map<Player, Integer> playerRating = new IdentityHashMap<>();
             Map<String, Integer> teamsScoreboard = new HashMap<>();
-            for (Player player : playerList) {
+            playerList.forEach(player -> {
                 playerRating.put(player, player.calculateRatingPoints());
                 if (!teamsScoreboard.containsKey(player.getTeamName())) {
                     teamsScoreboard.put(player.getTeamName(), 0);
                 }
-            }
-
+            });
             calculateMatchWinner(playerList, playerRating, teamsScoreboard);
             updatePlayerRatingTable(playerRating);
-        }
+        });
 
         return findTheMVP();
     }
     //calculating match winner and giving 10 additional rating points to winners
-    private void calculateMatchWinner(List<Player> playerList, Map<Player, Integer> playerRating, Map<String, Integer> teamScoreboard){
-        for (Player player: playerList) {
-            for (Map.Entry<String, Integer> team : teamScoreboard.entrySet()) {
-                if (team.getKey().equals(player.getTeamName())) {
-                    teamScoreboard.put(team.getKey(), team.getValue() + player.getScoredPoints());
-                }
-            }
-        }
+    private void calculateMatchWinner(List<Player> playerList, Map<Player, Integer> playerRating, Map<String, Integer> teamScoreboard) throws NoSuchElementException{
 
-        List<String> teamList = new ArrayList<>(teamScoreboard.keySet());
-        String winner = teamList.get(0);
+        teamScoreboard.forEach((teamName, score) -> teamScoreboard.put(teamName,
+                playerList.stream()
+                .filter(player -> teamName.equals(player.getTeamName()))
+                .map(Player::getScoredPoints)
+                .reduce(Integer::sum)
+                        .orElse(0)));
 
-        if(teamScoreboard.get(teamList.get(0)) < teamScoreboard.get(teamList.get(1))){
-            winner = teamList.get(1);
-        }
+        String winner = teamScoreboard.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .orElseThrow()
+                .getKey();
 
-        for (Map.Entry<Player, Integer> player: playerRating.entrySet()) {
-            if(player.getKey().getTeamName().equals(winner)){
-                playerRating.put(player.getKey(), player.getValue() + 10);
-            }
-        }
+        playerRating.entrySet()
+                .stream()
+                .filter(playerEntry -> playerEntry.getKey().getTeamName().equals(winner))
+                .forEach(playerEntry -> playerRating.put(playerEntry.getKey(), playerEntry.getValue() + 10));
+
     }
     //filling player rating table with actual players' rating points
     private void updatePlayerRatingTable(Map<Player,Integer> playerRating) {
-
-        for(Map.Entry<Player, Integer> player : playerRating.entrySet()) {
-            player = new AbstractMap.SimpleEntry<>(new Player(player.getKey().getName(), player.getKey().getNickname(), player.getKey().getNumber(), player.getKey().getTeamName()), player.getValue());
-            if (playerRatingTable.containsKey(player.getKey())) {
-                    playerRatingTable.put(player.getKey(), playerRatingTable.get(player.getKey()) + player.getValue());
+        playerRating.forEach((player, playerScore) -> {
+            player = new Player(player.getName(), player.getNickname(), player.getNumber(), player.getTeamName());
+            if (playerRatingTable.containsKey(player)) {
+                playerRatingTable.put(player, playerRatingTable.get(player) + playerScore);
             }
             else{
-                if(isNicknameUnique(player.getKey(), player.getValue())){
-                    playerRatingTable.put(player.getKey(), player.getValue());
+                if(isNicknameUnique(player, playerScore)){
+                    playerRatingTable.put(player, playerScore);
                 }
             }
-        }
+        });
     }
     //additional method to check nickname uniqueness in player rating table
     private boolean isNicknameUnique(Player player, int ratingScore){
@@ -88,14 +86,14 @@ public class GameAnalyzer {
     //method to find mvp
     private Map.Entry<Player, Integer> findTheMVP(){
 
-        Map.Entry<Player, Integer> mvp = Map.entry(new Player(), -1);
+        final Map.Entry<Player, Integer>[] mvp = new Map.Entry[]{Map.entry(new Player(), -1)};
 
-        for (Map.Entry<Player, Integer> player: playerRatingTable.entrySet()) {
-            if(player.getValue() > mvp.getValue()){
-                mvp = player;
+        playerRatingTable.forEach((k, v) -> {
+            if(v > mvp[0].getValue()){
+                mvp[0] = Map.entry(k, v);
             }
-        }
+        });
 
-        return mvp;
+        return mvp[0];
     }
 }

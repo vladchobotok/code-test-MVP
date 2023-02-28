@@ -1,27 +1,32 @@
 package org.example;
 
 import org.example.players.Player;
-import org.example.config.AppConfig;
 import org.example.utils.GameReader;
 import org.junit.Before;
 import org.junit.Test;
 import org.example.utils.GameAnalyzer;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class GameAnalyzerTest{
+
+    private final GameAnalyzer gameAnalyzer;
+    private final GameReader gameReader;
+
     @Autowired
-    private GameAnalyzer gameAnalyzer;
-    @Autowired
-    private GameReader gameReader;
+    GameAnalyzerTest(GameAnalyzer gameAnalyzer, GameReader gameReader){
+        this.gameAnalyzer = gameAnalyzer;
+        this.gameReader = gameReader;
+    }
+
     private List<List<Player>> allPlayers;
     private int expectedMvpRatingScore;
 

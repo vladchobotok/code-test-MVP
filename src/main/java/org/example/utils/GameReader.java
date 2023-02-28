@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class GameReader {
     //getting all players from files
@@ -72,13 +74,14 @@ public class GameReader {
 
     //checking if all nicknames unique in the match
     private void isPlayerNicknameUnique(List<Player> playersFromOneGame){
-        for (Player firstPlayer: playersFromOneGame) {
-            for (Player secondPlayer: playersFromOneGame) {
-                if(firstPlayer.getNickname().equals(secondPlayer.getNickname()) && firstPlayer != secondPlayer){
-                    System.err.println("Error! There are two players with the same nickname in one game: " + firstPlayer.getNickname());
-                    System.exit(0);
-                }
-            }
+
+        List<String> nicknames = playersFromOneGame.stream()
+                .map(Player::getNickname)
+                .collect(Collectors.toList());
+
+        if(nicknames.size() != nicknames.stream().distinct().count()){
+            System.err.println("Error! There are two players with the same nickname in one game.");
+            System.exit(0);
         }
     }
 }
