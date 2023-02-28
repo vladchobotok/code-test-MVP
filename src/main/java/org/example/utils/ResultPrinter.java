@@ -20,6 +20,15 @@ public class ResultPrinter implements CommandLineRunner {
         this.gameAnalyzer = gameAnalyzer;
     }
 
+    //method to calculate the mvp
+    @Override
+    public void run(String... args) {
+        List<List<Player>> allPlayers = gameReader.getPlayersFromAllMatches(System.getProperty("user.dir") + "/src/main/resources");
+        Map.Entry<Player, Integer> mvp = gameAnalyzer.getMvpOfTournament(allPlayers);
+        Map<Player, Integer> playerRatingTable = gameAnalyzer.getPlayerRatingTable();
+        printTheResults(mvp, playerRatingTable);
+    }
+
     //method to print the results
     public void printTheResults(Map.Entry<Player, Integer> mvp, Map<Player, Integer> playerRatingTable){
         System.out.println("==================================TOURNAMENT RATING TABLE==================================");
@@ -31,13 +40,5 @@ public class ResultPrinter implements CommandLineRunner {
         System.out.println();
         System.out.println("The MVP of tournament is " + mvp.getKey().getName() + " with nickname " + "\"" + mvp.getKey().getNickname() + "\". " +
                 "He/She got " + mvp.getValue() + " rating points!\n");
-    }
-
-    @Override
-    public void run(String... args) {
-        List<List<Player>> allPlayers = gameReader.getPlayersFromAllMatches(System.getProperty("user.dir") + "/src/main/resources");
-        Map.Entry<Player, Integer> mvp = gameAnalyzer.getMvpOfTournament(allPlayers);
-        Map<Player, Integer> playerRatingTable = gameAnalyzer.getPlayerRatingTable();
-        printTheResults(mvp, playerRatingTable);
     }
 }

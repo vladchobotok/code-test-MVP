@@ -10,35 +10,27 @@ import java.util.*;
 public class GameAnalyzer {
     private final Map<Player, Integer> playerRatingTable = new HashMap<>();
 
-    //iterating through the games and calculating players' rating points
-    public Map.Entry<Player, Integer> getMvpOfTournament(List<List<Player>> allPlayers){
+    //iterating through the games and calculating players' rating points, returning an MVP of the tournament
+    public Map.Entry<Player, Integer> getMvpOfTournament(List<List<Player>> allPlayers) throws NoSuchElementException{
 
-        allPlayers.forEach(playerList -> {
-            Map<Player, Integer> playerRating = new IdentityHashMap<>();
-            Map<String, Integer> teamsScoreboard = new HashMap<>();
-            playerList.forEach(player -> {
-                playerRating.put(player, player.calculateRatingPoints());
-                if (!teamsScoreboard.containsKey(player.getTeamName())) {
-                    teamsScoreboard.put(player.getTeamName(), 0);
-                }
-            });
-            calculateMatchWinner(playerList, playerRating, teamsScoreboard);
-            updatePlayerRatingTable(playerRating);
-        });
+        allPlayers.forEach(this::calculateWinnerTeamAndUpdateRating);
 
         return findTheMVP();
     }
-    //calculating match winner and giving 10 additional rating points to winners
-    private void calculateMatchWinner(List<Player> playerList, Map<Player, Integer> playerRating, Map<String, Integer> teamScoreboard) throws NoSuchElementException{
+    // calculating winner of the game and updating tournament rating table
+    private void calculateWinnerTeamAndUpdateRating(List<Player> playerList){
+        Map<Player, Integer> playerRating = new IdentityHashMap<>();
+        Map<String, Integer> teamsScoreboard = new HashMap<>();
 
-        teamScoreboard.forEach((teamName, score) -> teamScoreboard.put(teamName,
-                playerList.stream()
-                .filter(player -> teamName.equals(player.getTeamName()))
-                .map(Player::getScoredPoints)
-                .reduce(Integer::sum)
-                        .orElse(0)));
+        playerList.forEach(player -> {
+            playerRating.put(player, player.calculateRatingPoints());
+            if (!teamsScoreboard.containsKey(player.getTeamName())) {
+                teamsScoreboard.put(player.getTeamName(), 0);
+            }
+            teamsScoreboard.put(player.getTeamName(), teamsScoreboard.get(player.getTeamName()) + player.getScoredPoints());
+        });
 
-        String winner = teamScoreboard.entrySet()
+        String winner = teamsScoreboard.entrySet()
                 .stream()
                 .max(Map.Entry.comparingByValue())
                 .orElseThrow()
@@ -49,7 +41,9 @@ public class GameAnalyzer {
                 .filter(playerEntry -> playerEntry.getKey().getTeamName().equals(winner))
                 .forEach(playerEntry -> playerRating.put(playerEntry.getKey(), playerEntry.getValue() + 10));
 
+        updatePlayerRatingTable(playerRating);
     }
+
     //filling player rating table with actual players' rating points
     private void updatePlayerRatingTable(Map<Player,Integer> playerRating) {
         playerRating.forEach((player, playerScore) -> {
